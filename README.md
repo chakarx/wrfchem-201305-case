@@ -3,7 +3,6 @@
 本文件是本案例唯一的完整执行入口，替代之前分散的运行流程。所有命令在服务器 Linux/Bash 中执行。
 案例为 **2013-05-01 00 UTC 至 2013-05-03 00 UTC，共 48 小时**；60/20 km 两域；
 CBM-Z/MOSAIC 四段含液相（chem_opt=9），使用 MIX 人为源、MEGAN 生物源、GOCART 扬尘、在线海盐和 MOZBC。
-完成一小时短测后，分别运行 ARI_on、ARI_off；两组使用同一批初始/边界和排放。
 
 ```text
 FNL + 地理静态数据
@@ -20,19 +19,14 @@ MEGAN 预处理 → wrfbiochemi_d01/d02；检查扬尘静态场
         ↓
 按最终 wrfinput 生成 MIX 逐小时排放，计算 kemit，生成正式 WRF namelist
         ↓
-独立目录：1 小时短测 → ARI_on 48 小时 → ARI_off 48 小时 → 检查输出
-```
 
-已经完成的步骤，核对本节所列文件、时间、网格和成功日志后可以跳过。
-**MOZBC 后不要重新 real；若重新 real，须重新做 MOZBC。** 每个 sbatch 都是异步提交，
-必须等本步成功后才进行依赖它的下一步。不要整篇一次性粘贴运行。
 
 ## 1. 本次采用的配置和输入状态
 
 | 项目 | 本次设置 / 需核实内容 |
 |---|---|
 | 日期 | 两域均为 2013-05-01 00 → 05-03 00 UTC；FNL 6 小时、排放和输出 1 小时 |
-| 网格 | d01 90×72、60 km；d02 159×144、20 km，均指质量点 |
+| 网格 | d01 90×72、60 km；d02 159×144、20 km|
 | 垂直 | 35 个质量层，顶压 5000 Pa；实际 1 km 以下是否多于 10 层由 wrfinput 检查 |
 | 物理 | YSU、Noah、Lin、Grell、RRTMG；时间步长 120 s，嵌套比例 3 |
 | 化学 | chem_opt=9；emiss_opt=3；emiss_inpt_opt=1；kemit 按实际层高自动确定 |
@@ -40,20 +34,10 @@ MEGAN 预处理 → wrfbiochemi_d01/d02；检查扬尘静态场
 | 气象 | 9 个 FNL 已在本机下载；上传服务器或用第 2 节命令下载/校验 |
 | MIX | v1.1 的 2010 年 5 月，40 个原始 nc，含 31 个 SAPRC99 VOC 文件；已在本机准备 |
 | MEGAN | 预处理器编译方法及运行命令见第 6 节；完整静态数据尚未在本工作区准备 |
-| 化学初边值 | 使用你已有的旧 MOZART 文件，提取同月日时并改日期；服务器实际文件仍须通过检查 |
-| 配对试验 | ARI_on/off 只改变 aer_ra_feedback；无观测同化 |
 
-论文使用 WRF 3.7.1，本地源码标注 3.9.1；清单基准年、五月模拟时段、精确网格位置和部分处理假设
-也未与论文完全一致。本次是参考论文主要设置的基准试验，不能标作论文所有配置的严格复现。
-旧 MOZART 改日期仍保留源年份浓度，不能称为真实 2013 年化学边界。
 
 ## 2. 上传新版文件、统一目录和环境
 
-新版脚本包内部只有一层 paper_case。先解压到临时目录，再将其中的文件更新到实际 CASE_FILES，
-不要在已有 paper_case 中反复解压。保留自己的旧输出和配置备份；不要上传 Windows 的 .venv。
-脚本包不包含体积较大的原始 MIX、FNL、MEGAN 或 MOZART 数据。
-
-建议数据布局如下；已有双层 paper_case 的情况由下方设置自动识别。
 
 ```text
 mix_emissions_201305/
@@ -62,17 +46,11 @@ mix_emissions_201305/
 └── raw_mix_v1.1/2010/            40 个原始 nc
 ```
 
-在一个 Bash 会话设置以下变量；其中“实际路径”必须按服务器填写。若中途换终端，先重新设置。
-WPS_CASE 如已有本次合格结果，填写那个实际目录，不要无意创建另一套 WPS。
 
 ```bash
 export DATA_ROOT=/data1/share/elzd_2023_00080/xiaji/data/mix_emissions_201305
 export CASE_ROOT=/data1/share/elzd_2023_00080/xiaji/cases/wrfchem_20130501_03
 export CASE_FILES="$DATA_ROOT/paper_case"
-# 兼容你最近报错中实际存在的双层目录；两处都有脚本时，请手动指定更新后的那一处。
-if ! test -f "$CASE_FILES/emission_scheme.py"; then
-  export CASE_FILES="$DATA_ROOT/paper_case/paper_case"
-fi
 export MIX_DIR="$DATA_ROOT/raw_mix_v1.1/2010"
 export FNL_DIR="$DATA_ROOT/fnl_20130501_20130503"
 export WPS_CASE="$CASE_ROOT/WPS_case"
@@ -90,25 +68,10 @@ export ON_DIR="$CASE_ROOT/ARI_on"
 export OFF_DIR="$CASE_ROOT/ARI_off"
 export SMOKE_DIR="$CASE_ROOT/smoke_on"
 
-test -f "$CASE_FILES/emission_scheme.py" || { echo 'CASE_FILES 指错目录'; exit 1; }
 mkdir -p "$CASE_ROOT"
 source "$WRF_ENV"
-export OMP_NUM_THREADS=1
-ulimit -s unlimited
-ls -lh "$WRF_SRC/main/real.exe" "$WRF_SRC/main/wrf.exe"
-ls -lh "$WPS_SRC/geogrid.exe" "$WPS_SRC/ungrib.exe" "$WPS_SRC/metgrid.exe"
-ldd "$WRF_SRC/main/wrf.exe"
-command -v mpirun
-command -v ncdump
-command -v csh
 ```
 
-ldd 不能出现 not found；WRF/MPI/NetCDF 使用与编译时匹配的环境。
-下面各步骤的 WPS、MEGAN、MOZBC 命令在集群允许的计算节点执行。
-先修改 submit_case.slurm 中的分区、核数和必要的墙钟时间；示例为 bigmem、1 节点、24 MPI。
-不要直接使用原来固定 144 核且自动串联未知 MOZBC 配置的 m.RUN-WRFCHEM-spatial.sh。
-
-Python 使用已有的可用环境即可，不需要 f90nml。若没有环境，可创建：
 
 ```bash
 # 已有依赖齐全的 conda 环境时直接激活它，跳过下面前两行。
@@ -122,21 +85,6 @@ python "$CASE_FILES/check_case.py"
 后续 source 编译环境若改变了 Python 路径，重新激活你的 Python 环境再运行预处理脚本。
 生产工具不使用 f90nml；不要因之前缺这个库而继续安装它。
 
-已有 FNL 时，下面命令会检查已有文件；缺少时从脚本记录的官方来源下载，预期 9 个：
-
-```bash
-python "$CASE_FILES/download_fnl.py" --namelist "$CASE_FILES/namelist.wps" --output "$FNL_DIR"
-find "$FNL_DIR" -maxdepth 1 -name 'fnl_201305*.grib2' -type f | wc -l
-```
-
-MIX 已上传完整 40 个 nc 可跳过下载；否则在有外网的服务器运行：
-
-```bash
-python "$CASE_FILES/download_mix.py" --year 2010 --voc SAPRC99 --output "$DATA_ROOT/raw_mix_v1.1"
-test -s "$MIX_DIR/MICS_Asia_SAPRC99_ALK1_2010_0.25x0.25.nc" || exit 1
-```
-
-上述下载器的清单保留来源和校验记录。MEGAN 静态数据与 MOZART 化学场是另外两套数据，不包含在 MIX 中。
 
 ## 3. WPS：生成地理场和气象场
 
@@ -180,8 +128,6 @@ ls -lh geo_em.d01.nc geo_em.d02.nc
 完成标志：日志显示成功；两域 geo_em 均存在。查看 XLAT_M/XLONG_M、LU_INDEX、地形和嵌套位置，
 确认 NCP/YRD 均在目标覆盖区，嵌套在父域内。需要时先调整域，再重做后续步骤。
 如果修改域尺寸、位置或分辨率，须同步更新 paper_case 中的 namelist.wps 和 namelist.input 模板；
-后面的配置工具读取该目录模板，不能只改 WPS 工作目录里的一份。
-如需 GOCART 扬尘，核对是否提供正确的 EROD 等匹配网格静态场；不是只写 `dust_opt=13` 就一定有有效扬尘。
 
 ### 3.3 FNL → ungrib
 
@@ -194,9 +140,6 @@ tail -n 20 ungrib.log
 ls -1 FILE:2013-05-*
 ```
 
-GRIBFILE 应为 9 个；FILE 应覆盖 05-01 00/06/12/18、05-02 00/06/12/18、05-03 00，共 9 时次。
-FNL 时间就是 UTC，不要把文件名额外加 8 小时。
-此产品的官方 WRF 教程使用 [Vtable.GFS](https://www2.mmm.ucar.edu/wrf/OnLineTutorial/DATA/FNL/fnl.php)。
 
 ### 3.4 metgrid
 
@@ -208,18 +151,12 @@ ls -1 met_em.d02.*.nc | wc -l
 ncdump -h met_em.d01.2013-05-01_00:00:00.nc | head -n 65
 ```
 
-完成标志：每域 9 个 met_em，共 18 个；日志成功，温度、风、湿度、地面气压、土温和土壤湿度等必要场没有缺失错误。
-核对各域时次、num_metgrid_levels、num_st_layers、num_sm_layers、NUM_LAND_CAT。
 **模板里的 38/4/24 沿用原案例，不能直接认定适合本次 FNL/地理资料。**
 
 ## 4. 生成与实际 met_em 一致的运行 namelist
 
 本目录的工具读取全部 18 个 met_em，检查覆盖、质量点尺寸和层数一致性，然后生成新副本：
 
-`prepare_runtime_namelists.py` 已去除 f90nml 依赖，仅需 Python 标准库和 `netCDF4`。
-若现有环境已能 `python -c "import netCDF4"`，无需为这一步安装 f90nml；
-直接用更新后的脚本替换服务器同名文件。`check_case.py` 也不再依赖 f90nml，支持合法空段（例如 `&grib2 /`）；
-f90nml 只用于可选的独立参照测试（requirements-test.txt），不属于运行工具依赖。
 
 ```bash
 python "$CASE_FILES/prepare_runtime_namelists.py" \
@@ -232,10 +169,6 @@ python "$CASE_FILES/prepare_runtime_namelists.py" \
 - `prepared/namelist.input.ARI_off`：仅 ARI 开关与上份不同。
 - `prepared/namelist.input.bootstrap`：与 on 相比，只暂时把 bio_emiss_opt 改为 0，用于第一次 real。
 
-工具拒绝覆盖已有输出；如重做 WPS，使用新的 prepared 目录并同步后续路径。
-原始模板不会被修改。若层数/土地类别元数据缺失或不一致，先查清 met_em，不能跳过错误随意写一个数字。
-脚本只读取本案例需要的简单整数数组和引号日期，并定点修改参数，保留其他配置和注释；
-不是通用 Fortran namelist 解析器，所读取参数不支持下标赋值或重复值简写。
 
 ## 5. 第一次 real：给排放预处理提供网格
 
@@ -264,7 +197,6 @@ sbatch "$CASE_FILES/submit_case.slurm" real
 ```
 
 提交脚本示例采用现有脚本出现的 bigmem 分区，1 节点 24 MPI 进程。分区、核数、墙钟时间按集群实际要求修改。
-新父域仅 90×72 质量点；原来的 144 核不应直接照搬，过细分块可能触发最小 patch 尺寸错误。
 
 任务结束后：
 
@@ -276,10 +208,8 @@ python "$CASE_FILES/check_case.py" --wrfinput wrfinput_d01 wrfinput_d02
 
 成功标志为 `SUCCESS COMPLETE REAL_EM INIT`，以及两个 wrfinput、外域 wrfbdy、两个 wrflowinp。
 `sst_update=1` 所以这里需要 wrflowinp。检查工具还验证 35 个质量层和 1 km 以下的层数；
-若不满足论文“多于 10 层”的要求，调整 eta 后重做 real，再重做所有依赖网格/层高的排放处理。
-
 第一次 real 不需要最终 wrfchemi。暂时关闭 MEGAN 是为解决“预处理需要 wrfinput，但正式 real 又要读 wrfbiochemi”的先后依赖；
-**不能用这份 bootstrap namelist 进行正式 wrf 积分。** 本地 `main/real_em.F` 的 MEGAN 读取分支已核实。
+
 
 ## 6. 制作 MEGAN，核查扬尘静态输入
 
@@ -304,15 +234,8 @@ export MEGAN_EXE="$PWD/megan_bio_emiss"
 test -x "$MEGAN_EXE" || exit 1
 ```
 
-需要与工具匹配的 Fortran 和 NetCDF 库，按该目录 README.bio_emiss、make_util、Makefile 处理链接差异。
-Python netCDF4 不能代替 Fortran 链接库。若程序实际输出路径不同，修正 MEGAN_EXE。
-官方 [MEGAN 说明](https://github.com/NCAR/WRF-Chem-Preprocessing-Tools/blob/main/megan_bio_emiss/README.bio_emiss)
-要求“当月和上个月”的输入，因此本次选择 **4、5 月**。
 
 **MEGAN_DATA 要先有该工具所需的完整已转换静态数据。** 从上方 ACOM 官方工具入口获取配套数据，
-不是下载 GitHub 源码就会自动得到数据。若取得的是原始 MEGAN/地表数据，须先按 README 用
-megan_xform 和 surfdata_xform 转换；已有配套转换数据则不重复转换。
-不能用 MIX、WPS_GEOG 或旧网格的 wrfbiochemi 代替。目录核查后，在独立工作目录生成配置并运行：
 
 ```bash
 test -x "$MEGAN_EXE" || { echo '请先设置可用 MEGAN_EXE'; exit 1; }
@@ -336,19 +259,7 @@ ncdump -h wrfbiochemi_d02
 cp -p wrfbiochemi_d01 wrfbiochemi_d02 "$REAL_DIR/"
 ```
 
-MEGAN 是单进程预处理，不用 mpirun。官方要求 inp 中目录末尾不带斜杠，上述命令已去除末尾斜杠。
-目录变量在部分老工具中有 100 字符长度限制，长路径应使用较短的工作路径并重新核查。
-确认两域网格分别 90×72、159×144，4/5 月记录和 MLAI、MTSA、MSWDOWN、MSEBIO_ISOP、PFTP_* 等
-字段齐全、有限且植被覆盖合理。MSEBIO_ISOP 是参考排放因子，在线 MEGAN 随 WRF 气象计算逐时排放，
-不另做一套重复叠加的“逐小时 MEGAN wrfchemi”。
 
-### 6.2 GOCART 扬尘
-
-本地 MOSAIC 使用 dust_opt=13 的 GOCART 分支，并读取 EROD、土壤湿度、地表类型和风等字段。
-在 geo_em、met_em 和 wrfinput 间追踪 EROD 是否正确提供及保留，检查类型、维度和数值范围。
-如果没有 EROD 或在有沙尘源的区域全部为无效零，需补齐适用的静态数据和预处理，再重做相关 WPS/real 步骤。
-不要以创建全零文件的方式“修复”缺失，也不要为了消除错误把 dust_opt 从 13 随意改成 1。
-这里尚没有准备一套独立扬尘静态清单，不能把该项标为已经完成。
 
 ## 7. 第二次 real：生成正式化学初始与气象边界文件
 
@@ -366,62 +277,10 @@ sbatch "$CASE_FILES/submit_case.slurm" real
 结束后再次核对成功标志、文件和网格；本次应读入 MEGAN，bio_emiss_opt=3，chem_opt=9。
 这一步 real 仍使用 chem_in_opt=0 创建化学字段，不提前使用 MOZBC 正式积分配置。
 结束后再次执行第 5 节的文件/网格检查，并确认 MEGAN 读取没有报错。
-海盐 seas_opt=2 为在线过程，不需要另一个人为海盐排放文件；需有合理海陆掩膜和海面气象输入。
-本流程不另外开启未经配置的火点或闪电清单。
 
-你前面报错中的 `.true..` 是布尔值尾部多一个点，不应改成带引号字符串。
-对已有服务器 namelist，可用新版工具在验证和备份后修正；新生成且无错误的文件只检查：
 
-```bash
-python "$CASE_FILES/fix_namelist_bool.py" "$REAL_DIR/namelist.input" --apply
 ```
 
-其他解析错误按具体行号和 &段.参数处理；不要跳过检查。下面开始 MOZBC，之后不再运行 real。
-
-## 8. 准备化学场并生成 MOZBC 配置
-
-如果改日期的新文件还没有生成，运行：
-
-```bash
-python "$CASE_FILES/retime_mozart_for_case.py" \
-  --input "$MOZART_INPUT" \
-  --output "$MOZART_NC" \
-  --start 2013-05-01_00:00:00 --end 2013-05-03_00:00:00 \
-  --north 58 --south 10 --west 62 --east 142
-```
-
-已有该输出就检查并使用，不重复运行覆盖。改日期保留源浓度，不是真实 2013 年全球化学场。
-随后链接源文件和实际 met_em：
-
-```bash
-cd "$REAL_DIR"
-test -s "$MOZART_NC" || exit 1
-test -x "$MOZBC_EXE" || exit 1
-if test -e mozart_case_0001.nc; then
-  cmp -s "$MOZART_NC" mozart_case_0001.nc || { echo '已有不同 MOZART 文件'; exit 1; }
-else
-  ln -s "$MOZART_NC" mozart_case_0001.nc
-fi
-for f in "$WPS_CASE"/met_em.d0*.nc; do
-  test -f "$f" || continue
-  name="$(basename "$f")"
-  if test -e "$name"; then
-    cmp -s "$f" "$name" || { echo "已有不同文件 $name"; exit 1; }
-  else
-    ln -s "$f" "$name"
-  fi
-done
-
-python "$CASE_FILES/prepare_mozbc_inputs.py" --work-dir .
-```
-
-生成 mozbc_d01.inp、mozbc_d02.inp、mozbc_preflight.json、
-namelist.input.MOZBC.ARI_on/off。若这些文件已生成，先执行 `--check-only` 检查实际输入；
-仅当先前配置与当前脚本生成的配置一致时复用。要重新生成时先备份/移走列出的旧生成文件，脚本不覆盖。
-不要预先把上传包中的参考 inp 复制到 REAL_DIR 后又要求生成同名文件。
-
-检查器会检查完整区域、物种、单位、源时次及 MOZBC 最后一个趋势所需的额外端点。
-若提示源文件缺少某时次，必须扩展源数据和对应 met_em 覆盖，不能跳过检查。
 
 ## 9. 备份后执行 MOZBC
 
@@ -441,8 +300,6 @@ grep -q 'bc_wrfchem completed successfully' mozbc_d01.log || { tail -60 mozbc_d0
 grep -q 'bc_wrfchem completed successfully' mozbc_d02.log || { tail -60 mozbc_d02.log; exit 1; }
 ```
 
-MOZBC 是单进程任务，不用 mpirun。若集群要求计算任务通过调度器运行，在申请到的交互计算资源中执行，
-不要在登录节点长期运行。日志成功后，在 REAL_DIR 执行以下检查（四个边界侧面均检查；边界趋势允许正负，不作负值判断）：
 
 ```bash
 python - <<'PY'
@@ -466,11 +323,6 @@ for filename in ('wrfinput_d01','wrfinput_d02','wrfbdy_d01'):
 PY
 ```
 
-还应与 before_mozbc 中对应变量比较，确认需要映射的字段确实发生合理变化。
-当前映射继承 NCAR 旧参考系数。尤其 NH4NO3 → NO3 的系数约对应分子量 80，而纯硝酸根是 62；
-源 NH4 是否包含其中铵仍需源模式定义核实。因此本版能执行参考映射，但尚不能认为 NO3/NH4
-的定量质量定义已经验证；正式无机盐定量分析前必须解决，不能仅凭成功插值判断。
-之后不要再次 real 覆盖这三个文件；如重跑 real，就要重新 MOZBC。
 
 ## 10. 制作人为排放与最终运行 namelist
 
@@ -482,11 +334,6 @@ python emission_scheme.py --wrf-dir "$REAL_DIR" --mix-dir "$MIX_DIR"
 python make_mix_wrfchemi.py build --config mix_config.scheme.json
 ```
 
-此处显式 MIX_DIR 避免脚本层级导致原始数据相对路径错误。
-新方案直接读取 SAPRC99 摩尔排放并转换到本次接口，不再读空白 voc_profile_TO_FILL.csv；
-不要回到旧的 mix_config.json 直接 build。新增 VOC 替代映射是近似，详见 EMISSIONS_SCHEME_RUN.md。
-小时分配采用 UTC+8 部门曲线、星期权重均为 1、整月归一化；电力/工业按固定 AGL 高度带注入，
-其余部门表面注入。这些是明确的基准假设，不是动态烟羽抬升或已知的论文原始分配表。
 输出为 `$CASE_FILES/wrfchemi_201305_scheme/`，每域 49 文件，合计 98。
 配置还会另写两份匹配 kemit 的正式 MOZBC 运行 namelist：
 namelist.input.MOZBC.ARI_on.emissions、namelist.input.MOZBC.ARI_off.emissions。
