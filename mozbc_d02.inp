@@ -1,5 +1,3 @@
-! Legacy MOZART -> WRF 3.9.1 chem_opt=9; see MOZBC_QUICKSTART.md
-! Run from the final real.exe directory. Unmapped fields are retained.
 &control
  domain = 2,
  do_ic = .true.,
