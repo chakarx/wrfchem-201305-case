@@ -64,9 +64,7 @@ export MOZBC_EXE=/实际路径/mozbc
 export MOZART_INPUT=/实际路径/mozart4geos5-2024-EastAsia.nc
 export MOZART_NC="$CASE_ROOT/mozart4geos5_retimed_20130501_20130503.nc"
 export MEGAN_WORK="$CASE_ROOT/megan_work"
-export ON_DIR="$CASE_ROOT/ARI_on"
-export OFF_DIR="$CASE_ROOT/ARI_off"
-export SMOKE_DIR="$CASE_ROOT/smoke_on"
+
 
 mkdir -p "$CASE_ROOT"
 source "$WRF_ENV"
@@ -348,90 +346,6 @@ done
 每次应输出 49。再检查 processing_dXX_201305.json 的源数据、排除组分、时间/高度方案及所有警告。
 原始 CSV 空模板不再被新方案读取。具体映射限制见 EMISSIONS_SCHEME_RUN.md。
 
-## 11. 建立独立的短测、ARI_on、ARI_off 目录
-
-下面函数在当前 Bash 会话定义一次。使用全新目录，避免旧排放、旧日志或 restart 混入。
-物理/化学表链接自 real 工作目录，wrfinput/wrfbdy 和其他指定模型输入复制成本案例独立文件。
-
-```bash
-export ON_DIR="$CASE_ROOT/ARI_on"
-export OFF_DIR="$CASE_ROOT/ARI_off"
-export SMOKE_DIR="$CASE_ROOT/smoke_on"
-
-create_run_dir() {
-  target="$1"
-  nml="$2"
-  test -s "$nml" || return 1
-  mkdir "$target" || { echo "目录已存在，请检查后使用全新目录：$target"; return 1; }
-  for f in "$REAL_DIR"/*; do
-    test -f "$f" || continue
-    name="$(basename "$f")"
-    case "$name" in
-      namelist*|rsl.*|wrfinput*|wrfbdy*|wrflowinp*|wrfbiochemi*|wrfout*|wrfrst*|wrfchemi*|met_em*|moz*|job-*|*.log|*.py|*.json|*.csv|*.inp|*.md|*.zip|*.before-bool-fix) continue ;;
-    esac
-    ln -s "$f" "$target/$name" || return 1
-  done
-  for name in wrfinput_d01 wrfinput_d02 wrfbdy_d01 wrflowinp_d01 wrflowinp_d02 wrfbiochemi_d01 wrfbiochemi_d02; do
-    cp -p "$REAL_DIR/$name" "$target/$name" || return 1
-  done
-  for f in "$CASE_FILES"/wrfchemi_201305_scheme/wrfchemi_d0*; do
-    test -f "$f" || return 1
-    ln -s "$f" "$target/$(basename "$f")" || return 1
-  done
-  cp "$nml" "$target/namelist.input" || return 1
-  test -x "$target/wrf.exe"
-}
-
-create_run_dir "$SMOKE_DIR" "$CASE_FILES/namelist.input.MOZBC.ARI_on.emissions" || exit 1
-create_run_dir "$ON_DIR" "$CASE_FILES/namelist.input.MOZBC.ARI_on.emissions" || exit 1
-create_run_dir "$OFF_DIR" "$CASE_FILES/namelist.input.MOZBC.ARI_off.emissions" || exit 1
-```
-
-三个目录都使用 MOZBC 后的同一批初始/边界。不要把 on 的模拟结束状态或 restart 作为 off 初始条件。
-如果某目录准备中断，请先确认其内容，使用新的目录名重新准备；不要重复链接覆盖已有文件。
-
-在两个正式目录都准备好后，检查实际 namelist 的差异，不能仅凭模板判断：
-
-```bash
-cd "$CASE_FILES"
-python - "$ON_DIR/namelist.input" "$OFF_DIR/namelist.input" <<'PY'
-import sys
-from pathlib import Path
-from check_case import read_namelist
-on, off = [read_namelist(Path(p)) for p in sys.argv[1:]]
-assert on['chem']['aer_ra_feedback'] == [1,1]
-assert off['chem']['aer_ra_feedback'] == [0,0]
-for n in (on, off):
-    assert n['chem']['chem_in_opt'] == [1,1]
-    assert n['chem']['have_bcs_chem'] == [True,False]
-    assert n['chem']['bio_emiss_opt'] == [3,3]
-on['chem'].pop('aer_ra_feedback'); off['chem'].pop('aer_ra_feedback')
-assert on == off, 'ARI_on/off 还有其他参数不同'
-print('Formal namelists OK: only ARI differs')
-PY
-```
-
-## 12. 只把短测目录改为 1 小时
-
-```bash
-cd "$CASE_FILES"
-python - "$SMOKE_DIR/namelist.input" <<'PY'
-import sys
-from pathlib import Path
-from prepare_runtime_namelists import set_integers
-p=Path(sys.argv[1]); text=p.read_text()
-for key,values in [('run_days',[0]),('run_hours',[1]),('run_minutes',[0]),('run_seconds',[0]),
-                   ('end_year',[2013,2013]),('end_month',[5,5]),('end_day',[1,1]),
-                   ('end_hour',[1,1]),('end_minute',[0,0]),('end_second',[0,0])]:
-    # Original case omits run_minutes/run_seconds, whose WRF defaults are zero.
-    if key in ('run_minutes','run_seconds') and key not in text:
-        continue
-    text=set_integers(text,'time_control',key,values)
-p.write_text(text)
-PY
-```
-
-正式 ON_DIR/OFF_DIR 不修改，仍为 48 小时。短测仍链接完整 98 个排放文件，匹配现有提交脚本的输入检查。
 
 ## 13. 检查最终配置，提交 wrf.exe
 
@@ -457,80 +371,5 @@ cd "$SMOKE_DIR"
 sbatch "$CASE_FILES/submit_case.slurm" wrf
 ```
 
-**以上 sbatch 会启动异步作业，提交成功不代表 WRF 已经跑完。** 等作业结束后检查：
 
-```bash
-squeue -u "$USER"
-tail -n 40 "$SMOKE_DIR/rsl.error.0000"
-grep -F 'SUCCESS COMPLETE WRF' "$SMOKE_DIR/rsl.error.0000"
-ls -lh "$SMOKE_DIR"/wrfout_d0*2013-05-01_01:00:00
-```
 
-成功且浓度、气象无异常后再提交正式 on：
-
-```bash
-cd "$ON_DIR"
-sbatch "$CASE_FILES/submit_case.slurm" wrf
-```
-
-on 成功后提交 off（也可在资源允许时独立并行，输入必须相同）：
-
-```bash
-cd "$OFF_DIR"
-sbatch "$CASE_FILES/submit_case.slurm" wrf
-```
-
-提交脚本已经执行 `mpirun -np "$SLURM_NTASKS" ./wrf.exe`，无需再手动额外启动 wrf.exe。
-不要在同一目录同时运行两份 WRF。关闭终端不会取消已经提交的 Slurm 作业。
-
-## 14. 确认完整结束与结果检查
-
-```bash
-for d in "$ON_DIR" "$OFF_DIR"; do
-  grep -F 'SUCCESS COMPLETE WRF' "$d/rsl.error.0000"
-  ls -lh "$d"/wrfout_d01_2013-05-03_00:00:00 "$d"/wrfout_d02_2013-05-03_00:00:00
-  for dom in 01 02; do
-    find "$d" -maxdepth 1 -type f -name "wrfout_d${dom}_*" | wc -l
-  done
-done
-```
-
-history_interval=60、frames_per_outfile=1 时，每域预期 49 个 wrfout，含起点与终点。
-还要读实际 Times 和变量，不能只凭文件名、文件数或队列消失判断成功。
-
-下面读取所有输出的实际 Times，检查各域从起点至终点连续 49 条小时记录：
-
-```bash
-python - "$ON_DIR" "$OFF_DIR" <<'PY'
-import sys
-from pathlib import Path
-from datetime import datetime, timedelta
-from netCDF4 import Dataset, chartostring
-expected = [(datetime(2013,5,1)+timedelta(hours=i)).strftime('%Y-%m-%d_%H:%M:%S') for i in range(49)]
-for directory in map(Path,sys.argv[1:]):
-    for domain in ('01','02'):
-        times=[]
-        for p in sorted(directory.glob(f'wrfout_d{domain}_*')):
-            with Dataset(p) as nc:
-                times.extend(str(t) for t in chartostring(nc['Times'][:]).reshape(-1))
-        assert times == expected, f'{directory}: d{domain} actual Times are incomplete or duplicated'
-        print(directory, 'd'+domain, 'PASS: 49 hourly records')
-PY
-```
-
-检查完整过程的 NO2/O3/SO4/NO3/NH4 是否有限且无系统性异常，近地温度、湿度、风和 PBLH 是否合理。
-数值成功不等于排放/化学机制已经科学验证。
-
-结果只有 48 小时，能计算“本次 48 小时平均”；不能标为“2013 年 5 月完整月均”。
-48 小时平均通常用 [05-01 00,05-03 00) 的 48 条小时记录，终点用于完整性检查。
-正式定量研究还需要评估预热期和当前边界/排放近似的敏感性。
-
-出现问题先查出错目录当前作业的 rsl.error.0000、其他进程 rsl.error.* 和 job-作业号.err：
-
-- 缺 wrfchemi：目录链接、文件名冒号、时次、kemit 和文件维度。
-- 缺 wrfbiochemi：MEGAN 文件和新网格，不能使用 bootstrap 配置冒充正式配置。
-- 动态库错误：WRF_ENV、编译环境和 ldd wrf.exe，不能只安装 Python 库。
-- CFL/最小 patch：实际时间步长、层高、边界与并行分块；不要盲目增加核数。
-- namelist 语法错误：按新版报错的行号和 &段.参数检查，布尔值不加引号。
-
-所有生成器默认拒绝覆盖输出；要重做时先保留上一版，并在新目录/明确的新输出中运行。
