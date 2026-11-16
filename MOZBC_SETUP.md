@@ -1,50 +1,3 @@
-# 本次案例加入 MOZBC：数据准备和接入顺序
-
-用户已选择使用 MOZBC，并提供旧 MOZART 化学场的文件头，要求改日期后接入本次案例。
-已制作两个参考 inp 和实际数据检查/配置生成脚本，直接执行步骤见 [MOZBC_QUICKSTART.md](MOZBC_QUICKSTART.md)。
-本机尚无服务器上的实际化学场和最终 wrfinput，未运行 MOZBC；修改日期不等于获得真实 2013 年化学场。
-MIX 排放 nc 或 FNL 气象文件不能代替全球化学浓度场。
-
-## 当前补充：已有旧 MOZART 文件头，用户选择映射到 2013 年
-
-用户随后提供 `mozart4geos5-2024-EastAsia.nc` 的完整文件头，并要求修改时间。
-该头包含 56 层、`PS/P0/hyam/hybm`、`*_VMR_inst` 气体及旧 MOZART 气溶胶字段。
-文件名含 2024，但 history 涉及 2016-12-30 至 2018-01-02；实际年份以 `date/datesec` 数据为准。
-本地只有文件头，未取得服务器上的原始 nc，也未实际改写它。
-
-新增 `retime_mozart_for_case.py`：把源文件中相同月/日/时的化学场复制到
-2013-05-01 00 UTC 至 2013-05-03 00 UTC 的新时间轴，提取 9 时次和用户指定区域。
-这是一种明确使用替代年份边界的试验，不是重建或下载到真实 2013 年化学场。
-区域外侧保留原网格相邻点以完整包围请求范围；不做空间插值、不改变保留点浓度、不覆写原文件。
-
-把新版脚本上传到服务器的 paper_case，进入存放原 nc 的目录后执行：
-
-```bash
-python "$CASE_FILES/retime_mozart_for_case.py" \
-  --input mozart4geos5-2024-EastAsia.nc \
-  --output mozart4geos5_retimed_20130501_20130503.nc \
-  --start 2013-05-01_00:00:00 \
-  --end 2013-05-03_00:00:00 \
-  --north 58 --south 10 --west 62 --east 142
-```
-
-程序直接读取 date/datesec，避免用带 year=0000 的 time 单位猜测源年份。
-自动选择唯一覆盖全部所需月/日/时的源年份；如果有多个候选，需用 `--source-year 实际年份` 指定。
-缺时次、重复时间、范围不足、闰日不匹配或输出已存在时会报错。
-
-输出包括：
-
-- 新 nc：目标 date/datesec/time 坐标，以及原始化学/气象/垂直坐标字段的相应子集。
-- `retime_source_date`、`retime_source_datesec`、`retime_source_time`：原始记录时间，保留原 time 的单位。
-- `*.retime.json`：源年份、原始/目标时次、请求/实际区域及使用限制。
-- 全局 retime 元数据与 history：明确指出来源年份及“改日期不改变浓度”。
-
-除绝对时间坐标 date/datesec/time 外，原模式运行计数器及 nbdate 等源运行元数据保留原值。
-后续用 mozart_case_0001.nc 链接这个新文件，作为 inp 中的 fn_moz；物种映射仍须检查实际数据，
-修改日期不能代替 spc_map，也不会解决 MIX 人为 VOC 分配的问题。
-
-以下官方数据下载路线仍可用于取得真实年份匹配的化学场；前述替代年份试验应单独标注。
-
 ## 1. 取得化学场
 
 NCAR 目前推荐的 CAM-chem 边界数据为 CESM2.2，使用 MOZART-T1 气相化学及 MAM4-VBS 气溶胶。
@@ -141,24 +94,4 @@ NH4NO3/NH4 的质量定义、气溶胶伪分子量及数浓度系数尚需源模
     → MOZBC d02：化学 IC
     → 检查化学场/边界、日志及气象变量未被意外修改
     → 正式 WRF 运行配置
-    → 短测 → 完整模拟
-```
 
-正式 WRF 积分需要使用写入的化学初始场；本地 chem/chemics_init.F 在 chem_in_opt=0 时
-会执行 CBM-Z 背景气体初始化。因此采用这种 real→MOZBC→WRF 路线时，须将正式 WRF 的
-chem_in_opt 改为 1,1；不得把 WRF 用的配置直接提前用于首次 real，
-否则 real 会转而读取 input_chem_inname 指定的另一个化学输入文件。
-
-外域实际化学边界写入并检查后，正式 WRF 使用 have_bcs_chem=.true.,.false.，
-内域 nested=.true. 使用父域边界，不制作 wrfbdy_d02。
-生成器另写的 namelist.input.MOZBC.ARI_on/off 已包含这些开关；real 用的原模板仍保留 chem_in_opt=0。
-
-MOZBC 在文件上原位写入，因此先备份，且不要把待修改文件软链到不应改动的其他试验。
-MOZBC 成功后不能再运行 real 覆盖它；如必须重跑 real，随后重新运行 MOZBC。
-ARI_on 和 ARI_off 都应从同一批经过 MOZBC 的初始与边界文件复制起跑。
-
-已有 MOZBC 程序仍需检查可执行权限、ldd 动态库及它支持的数据格式。
-WRF 3.9.1 如实际启用混合垂直坐标，还需相容的 MOZBC 版本；不能只凭模型版本号或程序文件名判断。
-原来申请 144 核的串联脚本仍不应直接照搬本案例；MOZBC 通常按单进程运行。
-
-MOZBC 处理的是初始/边界浓度，不会补齐 MIX 人为排放中的 VOC 分配表；两项需要分别准备。
