@@ -359,11 +359,8 @@ done
 | restart | .false. | .false. |
 
 auxinput5 每 60 分钟读一个 wrfchemi，每文件一时次；sst_update=1 需要两个 wrflowinp。
-先检查 submit_case.slurm 顶部：默认 bigmem 分区、1 节点、24 MPI 进程；按集群实际资源修改，
-若要求墙钟时间则补充合法的 #SBATCH --time。不要直接使用原来的 144 核串联脚本。
 
 ```bash
-cd "$SMOKE_DIR"
 sbatch "$CASE_FILES/submit_case.slurm" wrf
 ```
 
