@@ -294,14 +294,18 @@ for filename in ('wrfinput_d01','wrfinput_d02','wrfbdy_d01'):
 PY
 ```
 
+mozbc运行成功后修改namelist.input
+```fortran
+ chem_in_opt = 1, 1,
+ have_bcs_chem = .true., .false.,
+```
 
 ## 10. 制作人为排放与最终运行 namelist
-
-重新进入有 Python 依赖的环境（如果上一步 source 改变了 Python 环境）。
 
 ```bash
 cd "$CASE_FILES"
 python emission_scheme.py --wrf-dir "$REAL_DIR" --mix-dir "$MIX_DIR"
+这一步输出的kemit的值，然后根据这个值修改namelist.input的对应地方
 python make_mix_wrfchemi.py build --config mix_config.scheme.json
 ```
 
@@ -313,25 +317,21 @@ for d in 01 02; do
   find "$CASE_FILES/wrfchemi_201305_scheme" -maxdepth 1 -type f -name "wrfchemi_d${d}_*" | wc -l
 done
 ```
-
-每次应输出 49。再检查 processing_dXX_201305.json 的源数据、排除组分、时间/高度方案及所有警告。
-原始 CSV 空模板不再被新方案读取。具体映射限制见 EMISSIONS_SCHEME_RUN.md。
-
+然后软链接wrfchemi_d* 到该路径下"$CASE_ROOT/real_work" 
 
 ## 13. 检查最终配置，提交 wrf.exe
 
 正式配置应为：
 
-| 参数 | ARI_on | ARI_off |
-|---|---|---|
-| chem_opt | 9,9 | 9,9 |
-| emiss_opt / emiss_inpt_opt | 3,3 / 1,1 | 相同 |
-| chem_in_opt | 1,1 | 1,1 |
-| have_bcs_chem | .true.,.false. | 相同 |
-| bio_emiss_opt | 3,3 | 3,3 |
-| kemit | emission_scheme 自动计算值 | 相同 |
-| aer_ra_feedback | 1,1 | 0,0 |
-| restart | .false. | .false. |
+| 参数 |
+| chem_opt | 9,9 | 
+| emiss_opt / emiss_inpt_opt | 3,3 / 1,1 |
+| chem_in_opt | 1,1 | 
+| have_bcs_chem | .true.,.false. |
+| bio_emiss_opt | 3,3 |
+| kemit | emission_scheme 自动计算值 | 
+| aer_ra_feedback | 1,1 | 
+| restart | .false. |
 
 auxinput5 每 60 分钟读一个 wrfchemi，每文件一时次；sst_update=1 需要两个 wrflowinp。
 
