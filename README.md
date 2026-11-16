@@ -1,6 +1,4 @@
-# WRF-Chem 本次运行最终版：气象场、自然源、MOZBC、MIX 与 WRF
-
-本文件是本案例唯一的完整执行入口，替代之前分散的运行流程。所有命令在服务器 Linux/Bash 中执行。
+# WRF-Chem 运行
 案例为 **2013-05-01 00 UTC 至 2013-05-03 00 UTC，共 48 小时**；60/20 km 两域；
 CBM-Z/MOSAIC 四段含液相（chem_opt=9），使用 MIX 人为源、MEGAN 生物源、GOCART 扬尘、在线海盐和 MOZBC。
 
@@ -31,8 +29,8 @@ MEGAN 预处理 → wrfbiochemi_d01/d02；检查扬尘静态场
 | 物理 | YSU、Noah、Lin、Grell、RRTMG；时间步长 120 s，嵌套比例 3 |
 | 化学 | chem_opt=9；emiss_opt=3；emiss_inpt_opt=1；kemit 按实际层高自动确定 |
 | 自然源 | bio_emiss_opt=3、dust_opt=13、seas_opt=2；相应输入需实际检查 |
-| 气象 | 9 个 FNL 已在本机下载；上传服务器或用第 2 节命令下载/校验 |
-| MIX | v1.1 的 2010 年 5 月，40 个原始 nc，含 31 个 SAPRC99 VOC 文件；已在本机准备 |
+| 气象 | 9 个 FNL|
+| MIX | v1.1 的 2010 年 5 月，40 个原始 nc，含 31 个 SAPRC99 VOC 文件|
 | MEGAN | 预处理器编译方法及运行命令见第 6 节；完整静态数据尚未在本工作区准备 |
 
 
@@ -48,6 +46,7 @@ mix_emissions_201305/
 
 
 ```bash
+#根据自己的路径来
 export DATA_ROOT=/data1/share/elzd_2023_00080/xiaji/data/mix_emissions_201305
 export CASE_ROOT=/data1/share/elzd_2023_00080/xiaji/cases/wrfchem_20130501_03
 export CASE_FILES="$DATA_ROOT/paper_case"
@@ -61,7 +60,9 @@ export WPS_SRC=/实际路径/已编译的WPS
 export GEOG_DIR=/实际路径/WPS_GEOG
 export MEGAN_DATA=/实际路径/MEGAN已转换静态数据
 export MOZBC_EXE=/实际路径/mozbc
+#边界场文件
 export MOZART_INPUT=/实际路径/mozart4geos5-2024-EastAsia.nc
+#实例中边界场文件的剪裁
 export MOZART_NC="$CASE_ROOT/mozart4geos5_retimed_20130501_20130503.nc"
 export MEGAN_WORK="$CASE_ROOT/megan_work"
 
@@ -79,10 +80,6 @@ python -m pip install -r "$CASE_FILES/requirements.txt"
 python -c 'import numpy, netCDF4, scipy, pyproj, shapely; print("Python dependencies OK")'
 python "$CASE_FILES/check_case.py"
 ```
-
-后续 source 编译环境若改变了 Python 路径，重新激活你的 Python 环境再运行预处理脚本。
-生产工具不使用 f90nml；不要因之前缺这个库而继续安装它。
-
 
 ## 3. WPS：生成地理场和气象场
 
@@ -109,11 +106,7 @@ p.write_text(s)
 PY
 cd "$WPS_CASE"
 ```
-
 上述命令已写入 GEOG_DIR；再核对这里的 namelist.wps。
-当前 `geog_data_res='glc2015_30s'` 是从原配置沿用的选项，要确认 GEOGRID.TBL 和静态数据都支持它。
-如实际使用其他土地利用产品，需保持 GEOGRID.TBL、土地利用类别和后续物理表一致。
-60/20 km 是论文公开设置；当前格点数、位置和土地利用产品不等于论文已公开的精确值。
 
 ### 3.2 geogrid
 
@@ -122,10 +115,6 @@ cd "$WPS_CASE"
 tail -n 20 geogrid.log
 ls -lh geo_em.d01.nc geo_em.d02.nc
 ```
-
-完成标志：日志显示成功；两域 geo_em 均存在。查看 XLAT_M/XLONG_M、LU_INDEX、地形和嵌套位置，
-确认 NCP/YRD 均在目标覆盖区，嵌套在父域内。需要时先调整域，再重做后续步骤。
-如果修改域尺寸、位置或分辨率，须同步更新 paper_case 中的 namelist.wps 和 namelist.input 模板；
 
 ### 3.3 FNL → ungrib
 
@@ -138,7 +127,6 @@ tail -n 20 ungrib.log
 ls -1 FILE:2013-05-*
 ```
 
-
 ### 3.4 metgrid
 
 ```bash
@@ -148,25 +136,18 @@ ls -1 met_em.d01.*.nc | wc -l
 ls -1 met_em.d02.*.nc | wc -l
 ncdump -h met_em.d01.2013-05-01_00:00:00.nc | head -n 65
 ```
-
-**模板里的 38/4/24 沿用原案例，不能直接认定适合本次 FNL/地理资料。**
-
 ## 4. 生成与实际 met_em 一致的运行 namelist
 
 本目录的工具读取全部 18 个 met_em，检查覆盖、质量点尺寸和层数一致性，然后生成新副本：
-
 
 ```bash
 python "$CASE_FILES/prepare_runtime_namelists.py" \
   --met-dir "$WPS_CASE" --output-dir "$CASE_ROOT/prepared"
 ```
-
 输出为：
-
 - `prepared/namelist.input.ARI_on`：修正气象层数、土壤层数和土地类别数后的正式配置。
 - `prepared/namelist.input.ARI_off`：仅 ARI 开关与上份不同。
 - `prepared/namelist.input.bootstrap`：与 on 相比，只暂时把 bio_emiss_opt 改为 0，用于第一次 real。
-
 
 ## 5. 第一次 real：给排放预处理提供网格
 
@@ -225,14 +206,11 @@ mkdir -p "$CASE_ROOT/external_tools"
 cd "$CASE_ROOT/external_tools"
 git clone https://github.com/NCAR/WRF-Chem-Preprocessing-Tools.git
 cd WRF-Chem-Preprocessing-Tools/megan_bio_emiss
-export FC=ifort
-export NETCDF_DIR="$(nc-config --prefix)"
+##编译
 ./make_util megan_bio_emiss
 export MEGAN_EXE="$PWD/megan_bio_emiss"
 test -x "$MEGAN_EXE" || exit 1
 ```
-
-
 **MEGAN_DATA 要先有该工具所需的完整已转换静态数据。** 从上方 ACOM 官方工具入口获取配套数据，
 
 ```bash
@@ -276,8 +254,6 @@ sbatch "$CASE_FILES/submit_case.slurm" real
 
 
 ```
-
-
 ## 9. 备份后执行 MOZBC
 
 ```bash
@@ -295,7 +271,6 @@ grep -q 'bc_wrfchem completed successfully' mozbc_d01.log || { tail -60 mozbc_d0
 "$MOZBC_EXE" < mozbc_d02.inp > mozbc_d02.log 2>&1
 grep -q 'bc_wrfchem completed successfully' mozbc_d02.log || { tail -60 mozbc_d02.log; exit 1; }
 ```
-
 
 ```bash
 python - <<'PY'
