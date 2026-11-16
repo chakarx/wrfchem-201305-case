@@ -1,0 +1,3 @@
+-r requirements.txt
+# Independent reference parser used by namelist and MOZBC preparation tests only.
+f90nml>=1.4

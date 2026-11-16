@@ -1,0 +1,38 @@
+name,kind,units,description
+E_ISO,gas,mol km^-2 hr^-1,"Isoprene EMISSIONS (Anth. for RADM/RACM, Anth+Bio for CBMZ)"
+E_SO2,gas,mol km^-2 hr^-1,EMISSIONS
+E_NO,gas,mol km^-2 hr^-1,EMISSIONS
+E_NO2,gas,mol km^-2 hr^-1,EMISSIONS NO2
+E_CO,gas,mol km^-2 hr^-1,EMISSIONS
+E_ETH,gas,mol km^-2 hr^-1,EMISSIONS
+E_HC3,gas,mol km^-2 hr^-1,EMISSIONS
+E_HC5,gas,mol km^-2 hr^-1,EMISSIONS
+E_HC8,gas,mol km^-2 hr^-1,EMISSIONS
+E_XYL,gas,mol km^-2 hr^-1,EMISSIONS
+E_OL2,gas,mol km^-2 hr^-1,EMISSIONS
+E_OLT,gas,mol km^-2 hr^-1,EMISSIONS
+E_OLI,gas,mol km^-2 hr^-1,EMISSIONS
+E_TOL,gas,mol km^-2 hr^-1,EMISSIONS
+E_CSL,gas,mol km^-2 hr^-1,EMISSIONS
+E_HCHO,gas,mol km^-2 hr^-1,EMISSIONS
+E_ALD,gas,mol km^-2 hr^-1,EMISSIONS
+E_KET,gas,mol km^-2 hr^-1,EMISSIONS
+E_ORA2,gas,mol km^-2 hr^-1,EMISSIONS
+E_NH3,gas,mol km^-2 hr^-1,EMISSIONS
+E_PM25I,particle,ug/m3 m/s,EMISSION RATE OF UNIDEN. PM2.5 MASS
+E_PM25J,particle,ug/m3 m/s,EMISSION RATE OF J-MODE UNIDEN. PM2.5 MASS
+E_PM_10,particle,ug/m3 m/s,EMISSIONS
+E_ECI,particle,ug/m3 m/s,EMISSION RATE OF I-MODE EC
+E_ECJ,particle,ug/m3 m/s,EMISSION RATE OF J-MODE EC
+E_ORGI,particle,ug/m3 m/s,EMISSION RATE OF I-MODE ORG. AER.
+E_ORGJ,particle,ug/m3 m/s,EMISSION RATE OF J-MODE ORG. AER.
+E_SO4I,particle,ug/m3 m/s,EMISSION RATE OF I-MODE ORG. AER.
+E_SO4J,particle,ug/m3 m/s,EMISSION RATE OF J-MODE ORG. AER.
+E_NO3I,particle,ug/m3 m/s,EMISSION RATE OF I-MODE ORG. AER.
+E_NO3J,particle,ug/m3 m/s,EMISSION RATE OF J-MODE ORG. AER.
+E_NAAJ,particle,ug/m3 m/s,EMISSION RATE OF J-MODE EC
+E_NAAI,particle,ug/m3 m/s,EMISSION RATE OF I-MODE EC
+E_ORGI_A,particle,ug/m3 m/s,EMISSIONS ORGI_A AER
+E_ORGJ_A,particle,ug/m3 m/s,EMISSIONS ORGJ_A AER
+E_ORGI_BB,particle,ug/m3 m/s,EMISSIONS ORGI_BB AER
+E_ORGJ_BB,particle,ug/m3 m/s,EMISSIONS ORGJ_BB AER

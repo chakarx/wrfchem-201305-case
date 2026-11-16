@@ -1,0 +1,885 @@
+{
+  "inventory_year": 2010,
+  "inventory_version": "MIX v1.1",
+  "inventory_year_note": "2010 is the selected available base year, NOT confirmed as the Huang 2020 base year.",
+  "start": "2013-05-01_00:00:00",
+  "end": "2013-05-03_00:00:00",
+  "kemit": 4,
+  "emiss_opt": 3,
+  "emiss_inpt_opt": 1,
+  "domains": [
+    {
+      "id": 1,
+      "wrfinput": "wrfinput_d01"
+    },
+    {
+      "id": 2,
+      "wrfinput": "wrfinput_d02"
+    }
+  ],
+  "interface_csv": "emission_interface.csv",
+  "voc_profile_csv": "voc_profile_TO_FILL.csv",
+  "output_dir": "wrfchemi_201305",
+  "sectors": {
+    "power": {
+      "sources": {
+        "SO2": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_SO2_{inventory_year}_0.25x0.25.nc",
+          "variable": "SO2_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NOx": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NOx_{inventory_year}_0.25x0.25.nc",
+          "variable": "NOx_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "CO": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_CO_{inventory_year}_0.25x0.25.nc",
+          "variable": "CO_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NH3": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NH3_{inventory_year}_0.25x0.25.nc",
+          "variable": "NH3_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "Unit",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NMVOC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NMVOC_{inventory_year}_0.25x0.25.nc",
+          "variable": "NMVOC_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM25": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM2.5_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM2.5_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM10": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM10_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM10_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "BC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_BC_{inventory_year}_0.25x0.25.nc",
+          "variable": "BC_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "OC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_OC_{inventory_year}_0.25x0.25.nc",
+          "variable": "OC_POWER",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        }
+      },
+      "vertical_weights": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "hourly_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "weekday_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "utc_offset_hours": 8,
+      "profile_note": "Uniform temporal distribution and surface injection are explicit placeholders, not the paper profiles."
+    },
+    "industry": {
+      "sources": {
+        "SO2": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_SO2_{inventory_year}_0.25x0.25.nc",
+          "variable": "SO2_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NOx": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NOx_{inventory_year}_0.25x0.25.nc",
+          "variable": "NOx_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "CO": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_CO_{inventory_year}_0.25x0.25.nc",
+          "variable": "CO_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NH3": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NH3_{inventory_year}_0.25x0.25.nc",
+          "variable": "NH3_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "Unit",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NMVOC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NMVOC_{inventory_year}_0.25x0.25.nc",
+          "variable": "NMVOC_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM25": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM2.5_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM2.5_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM10": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM10_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM10_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "BC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_BC_{inventory_year}_0.25x0.25.nc",
+          "variable": "BC_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "OC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_OC_{inventory_year}_0.25x0.25.nc",
+          "variable": "OC_INDUSTRY",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        }
+      },
+      "vertical_weights": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "hourly_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "weekday_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "utc_offset_hours": 8,
+      "profile_note": "Uniform temporal distribution and surface injection are explicit placeholders, not the paper profiles."
+    },
+    "residential": {
+      "sources": {
+        "SO2": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_SO2_{inventory_year}_0.25x0.25.nc",
+          "variable": "SO2_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NOx": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NOx_{inventory_year}_0.25x0.25.nc",
+          "variable": "NOx_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "CO": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_CO_{inventory_year}_0.25x0.25.nc",
+          "variable": "CO_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NH3": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NH3_{inventory_year}_0.25x0.25.nc",
+          "variable": "NH3_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "Unit",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NMVOC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NMVOC_{inventory_year}_0.25x0.25.nc",
+          "variable": "NMVOC_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM25": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM2.5_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM2.5_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM10": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM10_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM10_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "BC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_BC_{inventory_year}_0.25x0.25.nc",
+          "variable": "BC_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "OC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_OC_{inventory_year}_0.25x0.25.nc",
+          "variable": "OC_RESIDENTIAL",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        }
+      },
+      "vertical_weights": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "hourly_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "weekday_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "utc_offset_hours": 8,
+      "profile_note": "Uniform temporal distribution and surface injection are explicit placeholders, not the paper profiles."
+    },
+    "transportation": {
+      "sources": {
+        "SO2": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_SO2_{inventory_year}_0.25x0.25.nc",
+          "variable": "SO2_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NOx": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NOx_{inventory_year}_0.25x0.25.nc",
+          "variable": "NOx_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "CO": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_CO_{inventory_year}_0.25x0.25.nc",
+          "variable": "CO_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NH3": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NH3_{inventory_year}_0.25x0.25.nc",
+          "variable": "NH3_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "Unit",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NMVOC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NMVOC_{inventory_year}_0.25x0.25.nc",
+          "variable": "NMVOC_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM25": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM2.5_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM2.5_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "PM10": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_PM10_{inventory_year}_0.25x0.25.nc",
+          "variable": "PM10_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "BC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_BC_{inventory_year}_0.25x0.25.nc",
+          "variable": "BC_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "OC": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_OC_{inventory_year}_0.25x0.25.nc",
+          "variable": "OC_TRANSPORT",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "units",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        }
+      },
+      "vertical_weights": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "hourly_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "weekday_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "utc_offset_hours": 8,
+      "profile_note": "Uniform temporal distribution and surface injection are explicit placeholders, not the paper profiles."
+    },
+    "agriculture": {
+      "sources": {
+        "SO2": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        },
+        "NOx": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        },
+        "CO": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        },
+        "NH3": {
+          "file": "../raw_mix_v1.1/{inventory_year}/MICS_Asia_NH3_{inventory_year}_0.25x0.25.nc",
+          "variable": "NH3_AGRICULTURE",
+          "lat": "lat",
+          "lon": "lon",
+          "isel": {
+            "time": "{month_index}"
+          },
+          "units_attribute": "Unit",
+          "expected_units": "Mg/month",
+          "conversion_units": "tonne/cell/month",
+          "missing_as_zero": false,
+          "scale": 1.0
+        },
+        "NMVOC": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        },
+        "PM25": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        },
+        "PM10": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        },
+        "BC": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        },
+        "OC": {
+          "zero_with_reason": "Original MIX v1.1 reports agriculture only for NH3; no field for this species/sector."
+        }
+      },
+      "vertical_weights": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "hourly_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "weekday_factors": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "utc_offset_hours": 8,
+      "profile_note": "Uniform temporal distribution and surface injection are explicit placeholders, not the paper profiles."
+    }
+  },
+  "outputs": {
+    "E_SO2": [
+      {
+        "source": "SO2",
+        "factor": 1,
+        "mw": 64.066
+      }
+    ],
+    "E_NO": [
+      {
+        "source": "NOx",
+        "factor": 1,
+        "mw": 46.0055
+      }
+    ],
+    "E_CO": [
+      {
+        "source": "CO",
+        "factor": 1,
+        "mw": 28.01
+      }
+    ],
+    "E_NH3": [
+      {
+        "source": "NH3",
+        "factor": 1,
+        "mw": 17.0305
+      }
+    ],
+    "E_ECJ": [
+      {
+        "source": "BC",
+        "factor": 1
+      }
+    ],
+    "E_ORGJ": [
+      {
+        "source": "OC",
+        "factor": 1
+      }
+    ],
+    "E_PM25J": [
+      {
+        "source": "PM25",
+        "factor": 1
+      },
+      {
+        "source": "BC",
+        "factor": -1
+      },
+      {
+        "source": "OC",
+        "factor": -1
+      }
+    ],
+    "E_PM_10": [
+      {
+        "source": "PM10",
+        "factor": 1
+      },
+      {
+        "source": "PM25",
+        "factor": -1
+      }
+    ]
+  },
+  "zero_outputs": {
+    "E_ISO": "Anthropogenic isoprene is not specified by this RADM2 profile; online MEGAN biogenic emissions are separate.",
+    "E_NO2": "emiss_inpt_opt=1 CBMZ route uses E_NO; all inventory NOx moles are emitted as NO (NO2-equivalent input mass).",
+    "E_PM25I": "All fine primary emission assigned to the accumulation (j) input; MOSAIC subsequently redistributes to bins.",
+    "E_ECI": "All fine primary emission assigned to the accumulation (j) input; MOSAIC subsequently redistributes to bins.",
+    "E_ORGI": "All fine primary emission assigned to the accumulation (j) input; MOSAIC subsequently redistributes to bins.",
+    "E_SO4I": "Not provided by MIX totals; zero primary component is an explicit assumption. Secondary formation remains active.",
+    "E_SO4J": "Not provided by MIX totals; zero primary component is an explicit assumption. Secondary formation remains active.",
+    "E_NO3I": "Not provided by MIX totals; zero primary component is an explicit assumption. Secondary formation remains active.",
+    "E_NO3J": "Not provided by MIX totals; zero primary component is an explicit assumption. Secondary formation remains active.",
+    "E_NAAJ": "Not provided by MIX totals; zero primary component is an explicit assumption. Secondary formation remains active.",
+    "E_NAAI": "Not provided by MIX totals; zero primary component is an explicit assumption. Secondary formation remains active.",
+    "E_ORGI_A": "Extra SORGAM organic tracer not used for this CBMZ/MOSAIC input; avoid duplicating E_ORGJ.",
+    "E_ORGJ_A": "Extra SORGAM organic tracer not used for this CBMZ/MOSAIC input; avoid duplicating E_ORGJ.",
+    "E_ORGI_BB": "Extra SORGAM organic tracer not used for this CBMZ/MOSAIC input; avoid duplicating E_ORGJ.",
+    "E_ORGJ_BB": "Extra SORGAM organic tracer not used for this CBMZ/MOSAIC input; avoid duplicating E_ORGJ."
+  }
+}
