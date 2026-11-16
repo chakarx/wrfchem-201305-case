@@ -331,8 +331,7 @@ python make_mix_wrfchemi.py build --config mix_config.scheme.json
 ```
 
 输出为 `$CASE_FILES/wrfchemi_201305_scheme/`，每域 49 文件，合计 98。
-配置还会另写两份匹配 kemit 的正式 MOZBC 运行 namelist：
-namelist.input.MOZBC.ARI_on.emissions、namelist.input.MOZBC.ARI_off.emissions。
+
 
 ```bash
 for d in 01 02; do
