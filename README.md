@@ -236,9 +236,7 @@ test -x "$MEGAN_EXE" || exit 1
 **MEGAN_DATA 要先有该工具所需的完整已转换静态数据。** 从上方 ACOM 官方工具入口获取配套数据，
 
 ```bash
-test -x "$MEGAN_EXE" || { echo '请先设置可用 MEGAN_EXE'; exit 1; }
-test -d "$MEGAN_DATA" || { echo '尚未准备 MEGAN 静态数据'; exit 1; }
-mkdir "$MEGAN_WORK" || { echo 'MEGAN 工作目录已存在，请核查既有结果'; exit 1; }
+
 cd "$MEGAN_WORK"
 cat > megan_bio_emiss.inp <<EOF
 &control
@@ -335,7 +333,6 @@ python make_mix_wrfchemi.py build --config mix_config.scheme.json
 输出为 `$CASE_FILES/wrfchemi_201305_scheme/`，每域 49 文件，合计 98。
 配置还会另写两份匹配 kemit 的正式 MOZBC 运行 namelist：
 namelist.input.MOZBC.ARI_on.emissions、namelist.input.MOZBC.ARI_off.emissions。
-输出存在时不会覆盖；只有完成相同配置/数据的完整输出才可复用，不要把中断后的一部分输出当成成功。
 
 ```bash
 for d in 01 02; do
