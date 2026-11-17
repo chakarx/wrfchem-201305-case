@@ -37,6 +37,7 @@ VOC 直接从分物种 Mmol/month 乘 1e6 得 mol/month，守恒映射到实际�
 | `E_OLI` | `OLE2` |
 | `E_CSL` | `PHEN + CRES` |
 | `E_HCHO` | `HCHO` |
+
 醛、酮和不饱和含氧物采用同一张转换表的对应分配，包含拆分到多个目标物种的项，不能只按名称一对一转换。具体参考如“Effects of Urbanization
 on Regional Meteorology and Air Quality in Southern
 California”
