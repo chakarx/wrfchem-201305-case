@@ -72,7 +72,7 @@
 /
 &physics
  mp_physics = 2, 2,
- progn = 0, 0,
+ progn = 1, 1,
  ra_lw_physics = 4, 4,
  ra_sw_physics = 4, 4,
  radt = 20, 20,
